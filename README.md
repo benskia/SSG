@@ -1,2 +1,3 @@
-# Markdown_to_HTML2
+# Static Site Generator
+
 Converts markdown files to html.
