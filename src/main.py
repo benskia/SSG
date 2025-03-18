@@ -3,15 +3,26 @@ from textnode import (
     TextNode,
     TextType
 )
+from htmlnode import (
+    HTMLNode
+)
 
 
 def main():
-    node = TextNode(
+    textnode = TextNode(
         "this is some anchor text",
         TextType.LINK,
         "test://test.org"
     )
-    print(node)
+    htmlnode = HTMLNode(
+        "p",
+        "this is filler text",
+        [HTMLNode(), HTMLNode()],
+        {"href": "test://test.org", "font": "calibra"}
+    )
+
+    print(textnode)
+    print(htmlnode)
 
 
 if __name__ == "__main__":

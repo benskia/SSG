@@ -13,18 +13,8 @@ class HTMLNode():
         self.children = children
         self.props = props
 
-    def __eq__(self, other):
-        return (
-            self.text == other.text
-            and self.text_type == other.text_type
-            and self.url == other.url
-        )
-
     def __repr__(self):
-        txt = self.text
-        typ = self.text_type.value[0]
-        url = self.url
-        return f"TextNode({txt}, {typ}, {url})"
+        return f"HTMLNode({self.tag}, {self.value}, {self.children}, {self.props})"
 
     def to_html(self):
         raise NotImplementedError()
@@ -32,5 +22,5 @@ class HTMLNode():
     def props_to_html(self):
         html_props = ""
         for prop, value in self.props.items():
-            html_props += f' {prop}: "{value}"'
+            html_props += f' {prop}="{value}"'
         return html_props
