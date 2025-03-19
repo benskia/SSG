@@ -4,7 +4,9 @@ from textnode import (
     TextType
 )
 from htmlnode import (
-    HTMLNode
+    HTMLNode,
+    LeafNode,
+    ParentNode
 )
 
 
@@ -14,15 +16,14 @@ def main():
         TextType.LINK,
         "test://test.org"
     )
-    htmlnode = HTMLNode(
-        "p",
+    leafnode = LeafNode(
         "this is filler text",
-        [HTMLNode(), HTMLNode()],
+        "p",
         {"href": "test://test.org", "font": "calibra"}
     )
 
     print(textnode)
-    print(htmlnode)
+    print(leafnode.to_html())
 
 
 if __name__ == "__main__":
