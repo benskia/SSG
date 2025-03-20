@@ -3,7 +3,9 @@ import unittest
 from textnode import (
     TextNode,
     TextType,
-    text_node_to_html_node
+    DELIMITERS,
+    text_node_to_html_node,
+    split_nodes_delimiter
 )
 
 
@@ -64,6 +66,70 @@ class TestTextNode(unittest.TestCase):
             html_node.to_html(),
             "<b>a bold text node</b>"
         )
+
+    # split_nodes_delimiter()
+    def test_split_nodes_delimiter(self):
+        nodes = [TextNode("text with an _italic_ word", TextType.NORMAL)]
+        result = split_nodes_delimiter(
+            nodes,
+            DELIMITERS[TextType.ITALIC],
+            TextType.ITALIC
+        )
+        expect = [
+            TextNode("text with an ", TextType.NORMAL),
+            TextNode("italic", TextType.ITALIC),
+            TextNode(" word", TextType.NORMAL),
+        ]
+        self.assertEqual(result, expect)
+
+    def test_multiple_splits(self):
+        nodes = [
+            TextNode("a `few` words with `code` format", TextType.NORMAL)]
+        result = split_nodes_delimiter(
+            nodes,
+            DELIMITERS[TextType.CODE],
+            TextType.CODE
+        )
+        expect = [
+            TextNode("a ", TextType.NORMAL),
+            TextNode("few", TextType.CODE),
+            TextNode(" words with ", TextType.NORMAL),
+            TextNode("code", TextType.CODE),
+            TextNode(" format", TextType.NORMAL),
+        ]
+        self.assertEqual(result, expect)
+
+    def test_ending_delimiter(self):
+        nodes = [TextNode("text with ending **delimiter**", TextType.NORMAL)]
+        result = split_nodes_delimiter(
+            nodes,
+            DELIMITERS[TextType.BOLD],
+            TextType.BOLD
+        )
+        expect = [
+            TextNode("text with ending ", TextType.NORMAL),
+            TextNode("delimiter", TextType.BOLD),
+            TextNode("", TextType.NORMAL),
+        ]
+        self.assertEqual(result, expect)
+
+    def test_delimiter_not_found(self):
+        nodes = [TextNode("a normal text node", TextType.NORMAL)]
+        result = split_nodes_delimiter(
+            nodes,
+            DELIMITERS[TextType.BOLD],
+            TextType.BOLD
+        )
+        self.assertEqual(result, nodes)
+
+    def test_delimiter_unbalanced(self):
+        nodes = [TextNode("a text node with **bold within?", TextType.NORMAL)]
+        result = split_nodes_delimiter(
+            nodes,
+            DELIMITERS[TextType.BOLD],
+            TextType.BOLD
+        )
+        self.assertEqual(result, nodes)
 
 
 if __name__ == "__main__":

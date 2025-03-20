@@ -13,6 +13,13 @@ class TextType(Enum):
     IMAGE = "image",
 
 
+DELIMITERS: dict[TextType:str] = {
+    TextType.BOLD: "**",
+    TextType.ITALIC: "_",
+    TextType.CODE: "`",
+}
+
+
 class TextNode():
     def __init__(self, text: str, text_type: TextType, url: str | None = None):
         self.text = text
@@ -30,7 +37,7 @@ class TextNode():
         return f"TextNode({self.text}, {self.text_type.value[0]}, {self.url})"
 
 
-def text_node_to_html_node(text_node: TextNode):
+def text_node_to_html_node(text_node: TextNode) -> LeafNode:
     match text_node.text_type:
         case TextType.NORMAL:
             return LeafNode(text_node.text)
@@ -48,3 +55,49 @@ def text_node_to_html_node(text_node: TextNode):
             return LeafNode("", "img", props)
         case _:
             raise Exception("text node has invalid text type")
+
+
+def split_nodes_delimiter(
+    old_nodes: list[TextNode],
+    delimiter: str,
+    text_type: TextType
+) -> list[TextNode]:
+    new_nodes = []
+    for node in old_nodes:
+        if node.text.count(delimiter) == 0:
+            handle_delimiter_not_found(node, delimiter, text_type)
+            return old_nodes
+        if node.text.count(delimiter) % 2 != 0:
+            handle_delimiter_unbalanced(node, delimiter, text_type)
+            return old_nodes
+
+        split_text = node.text.split(delimiter)
+        for index, text in enumerate(split_text):
+            if index % 2 == 0:
+                new_nodes.append(TextNode(text, node.text_type))
+            else:
+                new_nodes.append(TextNode(text, text_type))
+
+    return new_nodes
+
+
+def handle_delimiter_not_found(
+    node: TextNode,
+    delimiter: str,
+    text_type: TextType
+):
+    print("delimiter not found in text node")
+    print(node)
+    print(f"\tdelimiter: {delimiter}")
+    print(f"\ttext type: {text_type.value[0]}")
+
+
+def handle_delimiter_unbalanced(
+    node: TextNode,
+    delimiter: str,
+    text_type: TextType
+):
+    print("cannot split text node on unbalanced delimiter")
+    print(node)
+    print(f"\tdelimiter: {delimiter}")
+    print(f"\ttext type: {text_type.value[0]}")
