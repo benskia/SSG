@@ -5,7 +5,9 @@ from textnode import (
     TextType,
     DELIMITERS,
     text_node_to_html_node,
-    split_nodes_delimiter
+    split_nodes_delimiter,
+    extract_markdown_images,
+    extract_markdown_links
 )
 
 
@@ -130,6 +132,49 @@ class TestTextNode(unittest.TestCase):
             TextType.BOLD
         )
         self.assertEqual(result, nodes)
+
+    # extract_markdown_images()
+    def test_extract_image(self):
+        text = "an ![image](test://test.org) in text"
+        result = extract_markdown_images(text)
+        expect = [("image", "test://test.org")]
+        self.assertEqual(result, expect)
+
+    def test_extract_images(self):
+        text = "multiple ![wow1](img1.org) in ![wow2](img2.org) text"
+        result = extract_markdown_images(text)
+        expect = [
+            ("wow1", "img1.org"),
+            ("wow2", "img2.org"),
+        ]
+        self.assertEqual(result, expect)
+
+    def test_extract_image_fail(self):
+        text = "not an [image](test://test.org) in text"
+        result = extract_markdown_images(text)
+        expect = []
+        self.assertEqual(result, expect)
+
+    def test_extract_link(self):
+        text = "a [link](test://test.org) in text"
+        result = extract_markdown_links(text)
+        expect = [("link", "test://test.org")]
+        self.assertEqual(result, expect)
+
+    def test_extract_links(self):
+        text = "multiple [wow1](link1.org) in [wow2](link2.org) text"
+        result = extract_markdown_links(text)
+        expect = [
+            ("wow1", "link1.org"),
+            ("wow2", "link2.org"),
+        ]
+        self.assertEqual(result, expect)
+
+    def test_extract_link_fail(self):
+        text = "not a ![link](test://test.org) in text"
+        result = extract_markdown_links(text)
+        expect = []
+        self.assertEqual(result, expect)
 
 
 if __name__ == "__main__":

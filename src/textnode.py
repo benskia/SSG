@@ -1,6 +1,6 @@
-# Models textnodes (any text-type html object)
-
 from enum import Enum
+from re import findall
+
 from htmlnode import LeafNode
 
 
@@ -20,6 +20,7 @@ DELIMITERS: dict[TextType:str] = {
 }
 
 
+# Models a unit of text within the html document (any of the above TextTypes).
 class TextNode():
     def __init__(self, text: str, text_type: TextType, url: str | None = None):
         self.text = text
@@ -37,6 +38,9 @@ class TextNode():
         return f"TextNode({self.text}, {self.text_type.value[0]}, {self.url})"
 
 
+# Converts the given TextNode into a LeafNode (HTMLNode with no children).
+# These represent the innermost tag of nested HTML elements that contain some
+# content.
 def text_node_to_html_node(text_node: TextNode) -> LeafNode:
     match text_node.text_type:
         case TextType.NORMAL:
@@ -57,6 +61,9 @@ def text_node_to_html_node(text_node: TextNode) -> LeafNode:
             raise Exception("text node has invalid text type")
 
 
+# Provided a list of TextNodes, a delimiter ("**"), and a TextType, splits the
+# text for each TextNode in old_nodes, creates appropriate TextNodes for each
+# segment of the text, and returns the resulting list of TextNodes.
 def split_nodes_delimiter(
     old_nodes: list[TextNode],
     delimiter: str,
@@ -81,6 +88,7 @@ def split_nodes_delimiter(
     return new_nodes
 
 
+# Warning handling when split_nodes_delimiter() returns the old nodes
 def handle_delimiter_not_found(
     node: TextNode,
     delimiter: str,
@@ -101,3 +109,32 @@ def handle_delimiter_unbalanced(
     print(node)
     print(f"\tdelimiter: {delimiter}")
     print(f"\ttext type: {text_type.value[0]}")
+
+
+# Parses text for markdown images, and returns a list of (anchor text, url)
+# tuples - to be converted into HTMLNodes.
+# Markdown image format is: ![alt text](url)
+def extract_markdown_images(text: str) -> list[tuple[str, str]]:
+    expression = r"!\[(.*?)\]\((.*?)\)"
+    matches = findall(expression, text)
+
+    parsed_images = []
+    for match in matches:
+        parsed_images.append((match[0], match[1]))
+
+    return parsed_images
+
+
+# Parses text for markdown links, and returns a list of (anchor text, url)
+# tuples - to be converted into HTMLNodes.
+# Markdown link format is: [anchor text](url)
+# Note, there is no preceding "!"
+def extract_markdown_links(text: str) -> list[tuple[str, str]]:
+    expression = r"(?<!!)\[(.*?)\]\((.*?)\)"
+    matches = findall(expression, text)
+
+    parsed_links = []
+    for match in matches:
+        parsed_links.append((match[0], match[1]))
+
+    return parsed_links
