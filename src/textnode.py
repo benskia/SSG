@@ -61,9 +61,9 @@ def text_node_to_html_node(text_node: TextNode) -> LeafNode:
             raise Exception("text node has invalid text type")
 
 
-# Provided a list of TextNodes, a delimiter ("**"), and a TextType, splits the
-# text for each TextNode in old_nodes, creates appropriate TextNodes for each
-# segment of the text, and returns the resulting list of TextNodes.
+# With a given list of TextNode (old_nodes), a delimiter ("**"), and TextType,
+# splits the text of each node to create a list of new TextNodes with
+# appropriate metadata.
 def split_nodes_delimiter(
     old_nodes: list[TextNode],
     delimiter: str,
@@ -71,10 +71,11 @@ def split_nodes_delimiter(
 ) -> list[TextNode]:
     new_nodes = []
     for node in old_nodes:
-        if node.text.count(delimiter) == 0:
+        delimiter_count = node.text.count(delimiter)
+        if delimiter_count == 0:
             handle_delimiter_not_found(node, delimiter, text_type)
             return old_nodes
-        if node.text.count(delimiter) % 2 != 0:
+        if delimiter_count % 2 != 0:
             handle_delimiter_unbalanced(node, delimiter, text_type)
             return old_nodes
 
@@ -93,7 +94,7 @@ def handle_delimiter_not_found(
     node: TextNode,
     delimiter: str,
     text_type: TextType
-):
+) -> None:
     print("delimiter not found in text node")
     print(node)
     print(f"\tdelimiter: {delimiter}")
@@ -104,7 +105,7 @@ def handle_delimiter_unbalanced(
     node: TextNode,
     delimiter: str,
     text_type: TextType
-):
+) -> None:
     print("cannot split text node on unbalanced delimiter")
     print(node)
     print(f"\tdelimiter: {delimiter}")
@@ -138,3 +139,99 @@ def extract_markdown_links(text: str) -> list[tuple[str, str]]:
         parsed_links.append((match[0], match[1]))
 
     return parsed_links
+
+
+# In a given list of TextNode (old_nodes), splits the text of each node on
+# markdown images to create a list of new TextNodes with appropriate metadata.
+def split_nodes_image(old_nodes: list[TextNode]) -> list[TextNode]:
+    new_nodes = []
+
+    for node in old_nodes:
+        node_text = node.text
+
+        parsed_images = extract_markdown_images(node.text)
+        if len(parsed_images) == 0:
+            new_nodes.append(node)
+            continue
+
+        # If image(s) parsed, a successful split is guaranteed. Python's
+        # split("", maxsplit=1), if guaranteed successful, likewise guarantees
+        # an even number of elements in the resulting list. This means that
+        # indexing at most 2 elements in split_text should be safe (read:
+        # shouldn't require additional safeguards against invalid access).
+        for alt_text, url in parsed_images:
+            img_text = f"![{alt_text}]({url})"
+            split_text = node_text.split(img_text, maxsplit=1)
+
+            if split_text[0] != "":
+                new_nodes.append(TextNode(
+                    split_text[0],
+                    node.text_type,
+                    node.url
+                ))
+
+            new_nodes.append(TextNode(
+                alt_text,
+                TextType.IMAGE,
+                url
+            ))
+
+            # Remove the processed text so any following images can be split
+            # from the remaining text. Append any final text.
+            node_text.replace(split_text[0] + img_text, "")
+            if split_text[1] != "":
+                new_nodes.append(TextNode(
+                    split_text[1],
+                    node.text_type,
+                    node.url
+                ))
+
+    return new_nodes
+
+
+# In a given list of TextNode (old_nodes), splits the text of each node on
+# markdown links to create a list of new TextNodes with appropriate metadata.
+def split_nodes_link(old_nodes: list[TextNode]) -> list[TextNode]:
+    new_nodes = []
+
+    for node in old_nodes:
+        node_text = node.text
+
+        parsed_images = extract_markdown_links(node.text)
+        if len(parsed_images) == 0:
+            new_nodes.append(node)
+            continue
+
+        # If image(s) parsed, a successful split is guaranteed. Python's
+        # split("", maxsplit=1), if guaranteed successful, likewise guarantees
+        # an even number of elements in the resulting list. This means that
+        # indexing at most 2 elements in split_text should be safe (read:
+        # shouldn't require additional safeguards against invalid access).
+        for alt_text, url in parsed_images:
+            img_text = f"[{alt_text}]({url})"
+            split_text = node_text.split(img_text, maxsplit=1)
+
+            if split_text[0] != "":
+                new_nodes.append(TextNode(
+                    split_text[0],
+                    node.text_type,
+                    node.url
+                ))
+
+            new_nodes.append(TextNode(
+                alt_text,
+                TextType.LINK,
+                url
+            ))
+
+            # Remove the processed text so any following images can be split
+            # from the remaining text. Append any final text.
+            node_text.replace(split_text[0] + img_text, "")
+            if split_text[1] != "":
+                new_nodes.append(TextNode(
+                    split_text[1],
+                    node.text_type,
+                    node.url
+                ))
+
+    return new_nodes

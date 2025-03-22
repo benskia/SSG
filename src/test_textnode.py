@@ -7,7 +7,9 @@ from textnode import (
     text_node_to_html_node,
     split_nodes_delimiter,
     extract_markdown_images,
-    extract_markdown_links
+    extract_markdown_links,
+    split_nodes_image,
+    split_nodes_link
 )
 
 
@@ -174,6 +176,82 @@ class TestTextNode(unittest.TestCase):
         text = "not a ![link](test://test.org) in text"
         result = extract_markdown_links(text)
         expect = []
+        self.assertEqual(result, expect)
+
+    # split_nodes_image()
+    def test_split_image(self):
+        nodes = [TextNode(
+            "text with an ![image](test://test.org/image.jpg)",
+            TextType.NORMAL
+        )]
+        result = split_nodes_image(nodes)
+        expect = [
+            TextNode("text with an ", TextType.NORMAL),
+            TextNode("image", TextType.IMAGE, "test://test.org/image.jpg"),
+        ]
+        self.assertEqual(result, expect)
+
+    def test_split_image_with_tail(self):
+        nodes = [TextNode(
+            "text with an ![image](test://test.org/image.jpg) inside",
+            TextType.NORMAL
+        )]
+        result = split_nodes_image(nodes)
+        expect = [
+            TextNode("text with an ", TextType.NORMAL),
+            TextNode("image", TextType.IMAGE, "test://test.org/image.jpg"),
+            TextNode(" inside", TextType.NORMAL),
+        ]
+        self.assertEqual(result, expect)
+
+    def test_split_image_fail(self):
+        nodes = [TextNode(
+            "text with a [link](test://test.org) inside",
+            TextType.NORMAL
+        )]
+        result = split_nodes_image(nodes)
+        expect = [TextNode(
+            "text with a [link](test://test.org) inside",
+            TextType.NORMAL
+        )]
+        self.assertEqual(result, expect)
+
+    # split_nodes_link()
+    def test_split_link(self):
+        nodes = [TextNode(
+            "text with a [link](test://test.org)",
+            TextType.NORMAL
+        )]
+        result = split_nodes_link(nodes)
+        expect = [
+            TextNode("text with a ", TextType.NORMAL),
+            TextNode("link", TextType.LINK, "test://test.org"),
+        ]
+        self.assertEqual(result, expect)
+
+    def test_split_link_with_tail(self):
+        nodes = [TextNode(
+            "text with a [link](test://test.org) inside",
+            TextType.NORMAL
+        )]
+        result = split_nodes_link(nodes)
+        expect = [
+            TextNode("text with a ", TextType.NORMAL),
+            TextNode("link", TextType.LINK, "test://test.org"),
+            TextNode(" inside", TextType.NORMAL),
+        ]
+        self.assertEqual(result, expect)
+
+    def test_split_link_fail(self):
+        nodes = [TextNode(
+            "text with an ![image](test://test.org/image.jpg)",
+            TextType.NORMAL
+        )]
+        result = split_nodes_link(nodes)
+        expect = [TextNode(
+            "text with an ![image](test://test.org/image.jpg)",
+            TextType.NORMAL
+        )]
         self.assertEqual(result, expect)
 
 
