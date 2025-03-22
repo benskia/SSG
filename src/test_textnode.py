@@ -4,12 +4,13 @@ from textnode import (
     TextNode,
     TextType,
     DELIMITERS,
-    text_node_to_html_node,
+    textnode_to_htmlnode,
     split_nodes_delimiter,
     extract_markdown_images,
     extract_markdown_links,
     split_nodes_image,
-    split_nodes_link
+    split_nodes_link,
+    text_to_textnodes
 )
 
 
@@ -59,13 +60,13 @@ class TestTextNode(unittest.TestCase):
     # text_node_to_html_node()
     def test_text(self):
         node = TextNode("a text node", TextType.NORMAL)
-        html_node = text_node_to_html_node(node)
+        html_node = textnode_to_htmlnode(node)
         self.assertEqual(html_node.tag, None)
         self.assertEqual(html_node.value, "a text node")
 
     def test_to_html(self):
         node = TextNode("a bold text node", TextType.BOLD)
-        html_node = text_node_to_html_node(node)
+        html_node = textnode_to_htmlnode(node)
         self.assertEqual(
             html_node.to_html(),
             "<b>a bold text node</b>"
@@ -252,6 +253,36 @@ class TestTextNode(unittest.TestCase):
             "text with an ![image](test://test.org/image.jpg)",
             TextType.NORMAL
         )]
+        self.assertEqual(result, expect)
+
+    # text_to_textnodes()
+    def test_text_to_text_nodes(self):
+        text = "normal **bold** _italic_ `code` [link](url) ![image](url)"
+        result = text_to_textnodes(text)
+        expect = [
+            TextNode("normal ", TextType.NORMAL),
+            TextNode("bold", TextType.BOLD),
+            TextNode(" ", TextType.NORMAL),
+            TextNode("italic", TextType.ITALIC),
+            TextNode(" ", TextType.NORMAL),
+            TextNode("code", TextType.CODE),
+            TextNode(" ", TextType.NORMAL),
+            TextNode("link", TextType.LINK, "url"),
+            TextNode(" ", TextType.NORMAL),
+            TextNode("image", TextType.IMAGE, "url"),
+        ]
+        self.assertEqual(result, expect)
+
+    def test_text_to_text_nodes_with_tail(self):
+        text = "normal `code` **bold**"
+        result = text_to_textnodes(text)
+        expect = [
+            TextNode("normal ", TextType.NORMAL),
+            TextNode("code", TextType.CODE),
+            TextNode(" ", TextType.NORMAL),
+            TextNode("bold", TextType.BOLD),
+            TextNode("", TextType.NORMAL),
+        ]
         self.assertEqual(result, expect)
 
 

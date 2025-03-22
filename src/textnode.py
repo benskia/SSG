@@ -41,7 +41,7 @@ class TextNode():
 # Converts the given TextNode into a LeafNode (HTMLNode with no children).
 # These represent the innermost tag of nested HTML elements that contain some
 # content.
-def text_node_to_html_node(text_node: TextNode) -> LeafNode:
+def textnode_to_htmlnode(text_node: TextNode) -> LeafNode:
     match text_node.text_type:
         case TextType.NORMAL:
             return LeafNode(text_node.text)
@@ -70,14 +70,12 @@ def split_nodes_delimiter(
     text_type: TextType
 ) -> list[TextNode]:
     new_nodes = []
+
     for node in old_nodes:
         delimiter_count = node.text.count(delimiter)
-        if delimiter_count == 0:
-            handle_delimiter_not_found(node, delimiter, text_type)
-            return old_nodes
-        if delimiter_count % 2 != 0:
-            handle_delimiter_unbalanced(node, delimiter, text_type)
-            return old_nodes
+        if delimiter_count == 0 or delimiter_count % 2 != 0:
+            new_nodes.append(node)
+            continue
 
         split_text = node.text.split(delimiter)
         for index, text in enumerate(split_text):
@@ -87,29 +85,6 @@ def split_nodes_delimiter(
                 new_nodes.append(TextNode(text, text_type))
 
     return new_nodes
-
-
-# Warning handling when split_nodes_delimiter() returns the old nodes
-def handle_delimiter_not_found(
-    node: TextNode,
-    delimiter: str,
-    text_type: TextType
-) -> None:
-    print("delimiter not found in text node")
-    print(node)
-    print(f"\tdelimiter: {delimiter}")
-    print(f"\ttext type: {text_type.value[0]}")
-
-
-def handle_delimiter_unbalanced(
-    node: TextNode,
-    delimiter: str,
-    text_type: TextType
-) -> None:
-    print("cannot split text node on unbalanced delimiter")
-    print(node)
-    print(f"\tdelimiter: {delimiter}")
-    print(f"\ttext type: {text_type.value[0]}")
 
 
 # Parses text for markdown images, and returns a list of (anchor text, url)
@@ -235,3 +210,14 @@ def split_nodes_link(old_nodes: list[TextNode]) -> list[TextNode]:
                 ))
 
     return new_nodes
+
+
+# Combine all text parsing to convert a markdown string to a list of TextNodes.
+def text_to_textnodes(text: str) -> list[TextNode]:
+    text_nodes = [TextNode(text, TextType.NORMAL)]
+
+    for text_type, delimiter in DELIMITERS.items():
+        text_nodes = split_nodes_delimiter(text_nodes, delimiter, text_type)
+
+    with_images = split_nodes_image(text_nodes)
+    return split_nodes_link(with_images)
