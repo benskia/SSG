@@ -3,7 +3,7 @@ import unittest
 from htmlnode import (
     HTMLNode,
     LeafNode,
-    ParentNode
+    ParentNode,
 )
 
 

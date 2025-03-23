@@ -70,12 +70,26 @@ This is the same paragraph on a new line.
         self.assertEqual(result_fail_1, expect_fail)
         self.assertEqual(result_fail_2, expect_fail)
 
+    # TODO: Not sure why code blocks within docstrings are not being recognized
     def test_blocktype_code(self):
-        result_success = block_to_blocktype("```some code```")
-        result_fail = block_to_blocktype("``not quite code``")
+        code_line = """```a line of code```"""
+        code_block = """
+```
+wowee
+```
+        """
+        not_code_block = """
+``
+not code
+``
+        """
+        result_success_line = block_to_blocktype(code_line)
+        result_success_block = block_to_blocktype(code_block)
+        result_fail = block_to_blocktype(not_code_block)
         expect_success = BlockType.CODE
         expect_fail = BlockType.PARAGRAPH
-        self.assertEqual(result_success, expect_success)
+        self.assertEqual(result_success_line, expect_success)
+        self.assertEqual(result_success_block, expect_success)
         self.assertEqual(result_fail, expect_fail)
 
     def test_blocktype_quote(self):

@@ -1,5 +1,4 @@
 # Models htmlnodes (element tags)
-
 class HTMLNode():
     def __init__(
         self,
