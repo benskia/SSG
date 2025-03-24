@@ -54,15 +54,11 @@ def create_heading(block: str) -> ParentNode:
 
 def create_code(block: str) -> ParentNode:
     # Code blocks can be represented as a code LeafNode within a pre ParentNode
-    # (preformatted). Code blocks don't render inline formatting. In case there
-    # are additional backticks, avoid using strip().
-    without_backticks = block[3:-4]
-
-    # TODO: Code blocks sometimes include a language keyword (for colorization)
-    # after the opening line of backticks.
-    # Ex: ```python
-
-    code_node = LeafNode(without_backticks, "code")
+    # (preformatted). Code blocks don't render inline formatting. Given that
+    # this is a code block, we expect it to be fenced in - not inline.
+    lines: list[str] = block.split("\n")
+    code: str = "\n".join(lines[1:-1])
+    code_node = LeafNode(code, "code")
     return ParentNode("pre", [code_node])
 
 
