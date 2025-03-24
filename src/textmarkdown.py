@@ -39,7 +39,12 @@ def markdown_to_html_node(markdown: str) -> ParentNode:
 
 
 def create_paragraph(block: str) -> ParentNode:
-    return ParentNode("p", get_leafnodes(block))
+    # HTML Paragraphs don't implement breaks like markdown does, and we should
+    # probably just represent paragraph blocks as continuous text that can then
+    # be styled by CSS. Breaks typically act as word separators, so we can just
+    # replace newline characters with spaces.
+    without_newlines = block.replace("\n", " ")
+    return ParentNode("p", get_leafnodes(without_newlines))
 
 
 def create_heading(block: str) -> ParentNode:
@@ -55,9 +60,12 @@ def create_heading(block: str) -> ParentNode:
 def create_code(block: str) -> ParentNode:
     # Code blocks can be represented as a code LeafNode within a pre ParentNode
     # (preformatted). Code blocks don't render inline formatting. Given that
-    # this is a code block, we expect it to be fenced in - not inline.
+    # this is a code block, we expect it to be fenced in - not inline. Because
+    # these are preformatted blocks, we must be careful when splitting/joining
+    # on newlines as we might lose any that split to empty elements (such as
+    # at the beginning and end of the block)
     lines: list[str] = block.split("\n")
-    code: str = "\n".join(lines[1:-1])
+    code: str = "\n".join(lines[1:-1]) + "\n"
     code_node = LeafNode(code, "code")
     return ParentNode("pre", [code_node])
 
