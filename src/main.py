@@ -76,8 +76,10 @@ def static_to_public(src: str, dst: str) -> None:
 # Reads the markdown file at from_path and, using the template, populates the
 # {{ Content }} tag with HTML generated using the markdown document.
 def generate_page(from_path: str, template_path: str, dest_path: str) -> None:
-    print(f"Generating page from {from_path} to {dest_path} \
-            using {template_path}")
+    msg = f"Generating page from {from_path}"
+    msg += f" to {dest_path}"
+    msg += f" using {template_path}"
+    print(msg)
 
     with open(from_path, "r") as f:
         md = f.read()
