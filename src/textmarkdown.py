@@ -75,7 +75,7 @@ def create_quote(block: str) -> ParentNode:
     # it into a workable, continuous string we can then convert into
     # LeafNode(s).
     lines = block.split("\n")
-    cleaned_lines = [line.lstrip(">") for line in lines]
+    cleaned_lines = [line.lstrip(">").strip() for line in lines]
     clean_block = "\n".join(cleaned_lines)
     return ParentNode("blockquote", get_leafnodes(clean_block))
 
