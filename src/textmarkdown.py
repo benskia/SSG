@@ -77,7 +77,7 @@ def create_quote(block: str) -> ParentNode:
     lines = block.split("\n")
     cleaned_lines = [line.lstrip(">") for line in lines]
     clean_block = "\n".join(cleaned_lines)
-    return ParentNode("quote", get_leafnodes(clean_block))
+    return ParentNode("blockquote", get_leafnodes(clean_block))
 
 
 def create_unordered_list(block: str) -> ParentNode:
