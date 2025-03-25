@@ -48,3 +48,12 @@ def block_to_blocktype(block: str) -> BlockType:
         return BlockType.ORDERED_LIST
 
     return BlockType.PARAGRAPH
+
+
+# Pulls the title (# / H1) from a markdown document. Raises an exception when
+# no title is found.
+def extract_title(markdown: str) -> str:
+    heading = markdown_to_blocks(markdown)[0]
+    if not heading.startswith("# "):
+        raise Exception("Markdown document must start with a title as H1 (#)")
+    return heading.lstrip("#").strip()

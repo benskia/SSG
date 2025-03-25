@@ -8,9 +8,11 @@ from shutil import (
     copy,
     rmtree,
 )
-from sys import (
-    exit,
-)
+# from sys import (
+#     exit,
+# )
+
+from markdownblock import extract_title
 
 
 def main():
@@ -20,14 +22,16 @@ def main():
     # If user reverses the args, they could mistakenly delete all the static
     # files they prepared for this job. Make sure they want this. Currently
     # does nothing because directories are hard-coded.
-    src_dst_print = f"Source: {source}\nDestination: {destination}\n"
-    prompt = "This will result in deletion of files/dirs currently at the \
-        destination.\nContinue? (y/N) "
-    confirmation = input(src_dst_print + prompt)
-    if not confirmation.lower() == "y":
-        print("Exiting program without copying...")
-        exit(0)
+    # src_dst_print = f"Source: {source}\nDestination: {destination}\n"
+    # prompt = "This will result in deletion of files/dirs currently at the \
+    #     destination.\nContinue? (y/N) "
+    # confirmation = input(src_dst_print + prompt)
+    # if not confirmation.lower() == "y":
+    #     print("Exiting program without copying...")
+    #     exit(0)
 
+    title = extract_title("# title")
+    print(title)
     static_to_public(source, destination)
 
 
