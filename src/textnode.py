@@ -175,7 +175,7 @@ def split_nodes_link(old_nodes: list[TextNode]) -> list[TextNode]:
     new_nodes = []
 
     for node in old_nodes:
-        node_text = node.text
+        node_text: str = node.text
 
         parsed_images = extract_markdown_links(node.text)
         if len(parsed_images) == 0:
@@ -192,27 +192,16 @@ def split_nodes_link(old_nodes: list[TextNode]) -> list[TextNode]:
             split_text = node_text.split(img_text, maxsplit=1)
 
             if split_text[0] != "":
-                new_nodes.append(TextNode(
-                    split_text[0],
-                    node.text_type,
-                    node.url
-                ))
+                new_nodes.append(
+                    TextNode(split_text[0], node.text_type, node.url)
+                )
 
-            new_nodes.append(TextNode(
-                alt_text,
-                TextType.LINK,
-                url
-            ))
+            new_nodes.append(TextNode(alt_text, TextType.LINK, url))
 
-            # Remove the processed text so any following images can be split
-            # from the remaining text. Append any final text.
-            node_text.replace(split_text[0] + img_text, "")
-            if split_text[1] != "":
-                new_nodes.append(TextNode(
-                    split_text[1],
-                    node.text_type,
-                    node.url
-                ))
+            node_text = split_text[1]
+
+        if node_text != "":
+            new_nodes.append(TextNode(node_text, node.text_type, node.url))
 
     return new_nodes
 

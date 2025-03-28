@@ -242,6 +242,21 @@ class TestTextNode(unittest.TestCase):
         ]
         self.assertEqual(result, expect)
 
+    def test_split_multiple_links(self):
+        nodes = [TextNode(
+            "text with [one link](https://one.org) and [two links](https://two.org).",
+            TextType.NORMAL
+        )]
+        result = split_nodes_link(nodes)
+        expect = [
+            TextNode("text with ", TextType.NORMAL),
+            TextNode("one link", TextType.LINK, "https://one.org"),
+            TextNode(" and ", TextType.NORMAL),
+            TextNode("two links", TextType.LINK, "https://two.org"),
+            TextNode(".", TextType.NORMAL),
+        ]
+        self.assertEqual(result, expect)
+
     def test_split_link_fail(self):
         nodes = [TextNode(
             "text with an ![image](test://test.org/image.jpg)",
