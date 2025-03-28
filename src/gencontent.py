@@ -26,6 +26,7 @@ def generate_page(
     with_title = template.replace("{{ Title }}", title)
     with_content = with_title.replace("{{ Content }}", content)
     with_basepath = with_content.replace('href="/', f'href="/{base_path}/')
+    with_basepath = with_content.replace('src="/', f'src="/{base_path}/')
 
     with open(dest_path, "w") as f:
         f.write(with_basepath)
