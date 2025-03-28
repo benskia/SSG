@@ -79,6 +79,11 @@ def split_nodes_delimiter(
 
         split_text = node.text.split(delimiter)
         for index, text in enumerate(split_text):
+            # Python splits tend to preserve splits at the beginning or end of
+            # the input str by including an empty element in the output list.
+            # We don't want valueless LeafNodes.
+            if text == "":
+                continue
             if index % 2 == 0:
                 new_nodes.append(TextNode(text, node.text_type))
             else:
