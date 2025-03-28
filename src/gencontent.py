@@ -1,6 +1,6 @@
 from os import mkdir, path
 
-from markdownblock import markdown_to_html_node, markdown_to_blocks
+from markdownblock import markdown_to_htmlnode, markdown_to_blocks
 
 
 # Reads the markdown file at from_path and, using the template, populates the
@@ -16,7 +16,7 @@ def generate_page(from_path: str, template_path: str, dest_path: str) -> None:
     with open(template_path, "r") as f:
         template = f.read()
 
-    content = markdown_to_html_node(md).to_html()
+    content = markdown_to_htmlnode(md).to_html()
     title = extract_title(md)
     with_title = template.replace("{{ Title }}", title)
     html = with_title.replace("{{ Content }}", content)

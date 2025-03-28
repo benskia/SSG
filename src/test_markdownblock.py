@@ -4,7 +4,6 @@ from markdownblock import (
     markdown_to_blocks,
     block_to_blocktype,
     BlockType,
-    extract_title,
 )
 
 
@@ -139,19 +138,3 @@ in double-backticks
         self.assertEqual(result_fail_space_more, expect_fail)
         self.assertEqual(result_fail_num_one, expect_fail)
         self.assertEqual(result_fail_num_more, expect_fail)
-
-    # extract_title()
-    def test_title(self):
-        result = extract_title("# Title")
-        expect = "Title"
-        self.assertEqual(result, expect)
-
-    def test_title_missing(self):
-        md = "## Sub-heading\n\nSome `code` here"
-        with self.assertRaises(Exception):
-            extract_title(md)
-
-    def test_title_order(self):
-        md = "## Sub-heading\n\n# Title"
-        with self.assertRaises(Exception):
-            extract_title(md)
