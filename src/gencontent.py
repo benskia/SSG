@@ -32,7 +32,10 @@ def generate_pages_recursive(src_path: str, template_path: str, dest_path: str) 
         current_src: str = path.join(src_path, item)
         current_dest: str = path.join(dest_path, item)
         if path.isfile(current_src):
-            generate_page(current_src, template_path, current_dest)
+            if current_src[-2:] != "md":
+                print("skipping non-markdown content file")
+            html_dest: str = current_dest[:-2] + "html"
+            generate_page(current_src, template_path, html_dest)
             continue
         print(f"Creating destination directory {current_dest}")
         mkdir(current_dest)
