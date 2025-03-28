@@ -5,7 +5,12 @@ from markdownblock import markdown_to_htmlnode, markdown_to_blocks
 
 # Reads the markdown file at from_path and, using the template, populates the
 # {{ Content }} tag with HTML generated using the markdown document.
-def generate_page(src_path: str, template_path: str, dest_path: str) -> None:
+def generate_page(
+    src_path: str,
+    template_path: str,
+    dest_path: str,
+    base_path: str
+) -> None:
     msg = f"Generating page from {src_path}"
     msg += f" to {dest_path}"
     msg += f" using {template_path}"
@@ -19,14 +24,20 @@ def generate_page(src_path: str, template_path: str, dest_path: str) -> None:
     content = markdown_to_htmlnode(md).to_html()
     title = extract_title(md)
     with_title = template.replace("{{ Title }}", title)
-    html = with_title.replace("{{ Content }}", content)
+    with_content = with_title.replace("{{ Content }}", content)
+    with_basepath = with_content.replace('href="/', f'href="{base_path}')
 
     with open(dest_path, "w") as f:
-        f.write(html)
+        f.write(with_basepath)
 
 
 # Recursively generates public html files from provided markdown files.
-def generate_pages_recursive(src_path: str, template_path: str, dest_path: str) -> None:
+def generate_pages_recursive(
+    src_path: str,
+    template_path: str,
+    dest_path: str,
+    base_path: str
+) -> None:
     items: list[str] = listdir(src_path)
     for item in items:
         current_src: str = path.join(src_path, item)
@@ -35,11 +46,16 @@ def generate_pages_recursive(src_path: str, template_path: str, dest_path: str) 
             if current_src[-2:] != "md":
                 print("skipping non-markdown content file")
             html_dest: str = current_dest[:-2] + "html"
-            generate_page(current_src, template_path, html_dest)
+            generate_page(current_src, template_path, html_dest, base_path)
             continue
         print(f"Creating destination directory {current_dest}")
         mkdir(current_dest)
-        generate_pages_recursive(current_src, template_path, current_dest)
+        generate_pages_recursive(
+            current_src,
+            template_path,
+            current_dest,
+            base_path
+        )
 
 
 # Pulls the title (# / H1) from a markdown document. Raises an exception when
