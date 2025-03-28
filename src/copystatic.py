@@ -11,7 +11,7 @@ def static_to_public(src: str, dst: str) -> None:
         print(f"Destination already exists. Deleting {dst}")
         rmtree(dst)
     print(f"Creating new {dst} directory")
-    mkdir(src)
+    mkdir(dst)
 
     # shutil.copy() works on single files, and we must check each listdir()
     # item to see if it's a directory for mkdir() or file for copy(). We'll
