@@ -55,28 +55,33 @@ def block_to_blocktype(block: str) -> BlockType:
 
 # Coverts a markdown document into a single ParentNode containing all HTMLNodes
 # for all segments of the document.
-def markdown_to_html_node(markdown: str) -> ParentNode:
+def markdown_to_htmlnode(markdown: str) -> ParentNode:
     children = []
     blocks: list[str] = markdown_to_blocks(markdown)
     for block in blocks:
-        blocktype: BlockType = block_to_blocktype(block)
-        match blocktype:
-            case BlockType.PARAGRAPH:
-                children.append(create_paragraph(block))
-            case BlockType.HEADING:
-                children.append(create_heading(block))
-            case BlockType.CODE:
-                children.append(create_code(block))
-            case BlockType.QUOTE:
-                children.append(create_quote(block))
-            case BlockType.UNORDERED_LIST:
-                children.append(create_unordered_list(block))
-            case BlockType.ORDERED_LIST:
-                children.append(create_ordered_list(block))
+        children.append(block_to_htmlnode(block))
     return ParentNode("div", children)
 
 
-def create_paragraph(block: str) -> ParentNode:
+# Returns an appropriate ParentNode for the given block.
+def block_to_htmlnode(block: str) -> ParentNode:
+    blocktype: BlockType = block_to_blocktype(block)
+    match blocktype:
+        case BlockType.PARAGRAPH:
+            return paragraph_to_htmlnode(block)
+        case BlockType.HEADING:
+            return heading_to_htmlnode(block)
+        case BlockType.CODE:
+            return code_to_htmlnode(block)
+        case BlockType.QUOTE:
+            return quote_to_htmlnode(block)
+        case BlockType.UNORDERED_LIST:
+            return unordered_list_to_htmlnode(block)
+        case BlockType.ORDERED_LIST:
+            return ordered_list_to_htmlnode(block)
+
+
+def paragraph_to_htmlnode(block: str) -> ParentNode:
     # HTML Paragraphs don't implement breaks like markdown does, and we should
     # probably just represent paragraph blocks as continuous text that can then
     # be styled by CSS. Breaks typically act as word separators, so we can just
@@ -85,7 +90,7 @@ def create_paragraph(block: str) -> ParentNode:
     return ParentNode("p", get_leafnodes(without_newlines))
 
 
-def create_heading(block: str) -> ParentNode:
+def heading_to_htmlnode(block: str) -> ParentNode:
     # At this point, we know the block is a heading, so we can safely split it
     # on the first space. The first element can be used to determine the
     # heading's rank. The second element can be converted into LeafNode(s) to
@@ -95,7 +100,7 @@ def create_heading(block: str) -> ParentNode:
     return ParentNode(f"h{rank}", get_leafnodes(text))
 
 
-def create_code(block: str) -> ParentNode:
+def code_to_htmlnode(block: str) -> ParentNode:
     # Code blocks can be represented as a code LeafNode within a pre ParentNode
     # (preformatted). Code blocks don't render inline formatting. Given that
     # this is a code block, we expect it to be fenced in - not inline. Because
@@ -108,7 +113,7 @@ def create_code(block: str) -> ParentNode:
     return ParentNode("pre", [code_node])
 
 
-def create_quote(block: str) -> ParentNode:
+def quote_to_htmlnode(block: str) -> ParentNode:
     # Blocks are multiline, so we'll have to clean up the block and recombine
     # it into a workable, continuous string we can then convert into
     # LeafNode(s).
@@ -118,7 +123,7 @@ def create_quote(block: str) -> ParentNode:
     return ParentNode("blockquote", get_leafnodes(clean_block))
 
 
-def create_unordered_list(block: str) -> ParentNode:
+def unordered_list_to_htmlnode(block: str) -> ParentNode:
     # Unordered lists can be represented as a single 'ul' ParentNode containing
     # one or more 'li' ParentNode(s) that each have their progeny of LeafNodes.
     # Because we're representing multiple generations, we want to avoid
@@ -132,7 +137,7 @@ def create_unordered_list(block: str) -> ParentNode:
     return ParentNode("ul", list_items)
 
 
-def create_ordered_list(block: str) -> ParentNode:
+def ordered_list_to_htmlnode(block: str) -> ParentNode:
     # Ordered lists can be represented as a single 'ol' ParentNode containing
     # one or more 'li' ParentNode(s) that each have their progeny of LeafNodes.
     # Because HTML sorts out the numbering via the 'ol' tag, we need only
