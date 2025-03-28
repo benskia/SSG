@@ -34,7 +34,8 @@ def generate_page(from_path: str, template_path: str, dest_path: str) -> None:
 
 
 # Pulls the title (# / H1) from a markdown document. Raises an exception when
-# no title is found.
+# no title is found. Expects Google's standard for document layout (the title
+# is always the first line in the document).
 def extract_title(markdown: str) -> str:
     heading = markdown_to_blocks(markdown)[0]
     if not heading.startswith("# "):
