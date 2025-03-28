@@ -114,7 +114,6 @@ class TestTextNode(unittest.TestCase):
         expect = [
             TextNode("text with ending ", TextType.NORMAL),
             TextNode("delimiter", TextType.BOLD),
-            TextNode("", TextType.NORMAL),
         ]
         self.assertEqual(result, expect)
 
@@ -281,7 +280,6 @@ class TestTextNode(unittest.TestCase):
             TextNode("code", TextType.CODE),
             TextNode(" ", TextType.NORMAL),
             TextNode("bold", TextType.BOLD),
-            TextNode("", TextType.NORMAL),
         ]
         self.assertEqual(result, expect)
 
